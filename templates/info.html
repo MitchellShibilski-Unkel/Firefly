@@ -8,13 +8,13 @@
     </head>
 
     <body>
-        <div class="shows glass-panel">
+        <div class="shows glass-panel" style="margin-right: 70%;">
             <p><strong>Title:</strong> {{ title }}</p>
             <p><strong>Description:</strong> {{ description }}</p>
             <p><strong>Genre:</strong> {{ genre }}</p>
             <p><strong>Release Year:</strong> {{ release_year }}</p>
             <p><strong>Time:</strong> {{ time }}</p>
-
+            <button type="button" onclick="window.location.href='/player/{{ movie }}'">Play</button>
         </div>
 
         <button type="button" onclick="window.location.href='/index'">Back to Home</button>

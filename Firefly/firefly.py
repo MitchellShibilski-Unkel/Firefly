@@ -38,9 +38,9 @@ class Firefly:
         return f"{hours:02}:{minutes:02}:{secs:02}"
     
     def getMovieInformation(self, dist: str):
-        info = ffmpeg.probe(os.path.join(os.getcwd(), "media/movies", dist))
-        info_dict = {"length": self.secondsToTime(info["format"]["duration"]), "year": info["format"]["tags"].get("creation_time", "Unknown")[:4], }
-        return info_dict
+        path = dist if os.path.isabs(dist) else os.path.join(os.getcwd(), "media/movies", dist)
+        info = ffmpeg.probe(path)
+        return {"length": self.secondsToTime(info["format"]["duration"]), "year": info["format"]["tags"].get("creation_time", "Unknown")[:4]}
     
     def getMovies(self, dist: str = "movies.json"):
         with open(os.path.join(os.getcwd(), dist), "r") as f:         
@@ -149,5 +149,20 @@ class Firefly:
                 return "Movie not found", 404
             metadata = self.getMovieInformation(movie_info["filename"])
             return flask.render_template(self.info, movie=movie_info["title"], time=metadata["length"], year=metadata["year"])
+        
+        @app.route("/player/<movie>", methods=["GET", "POST"])
+        def player(movie):
+            movie_info = self.loadMovie(movie)
+            if not movie_info:
+                return "Movie not found", 404
+            return flask.render_template("player.html", movie=movie_info["title"], filename=os.path.basename(movie_info["filename"]))
+
+        @app.route("/media/<path:filename>")
+        def media(filename):
+            movie_info_list = json.load(open(os.path.join(os.getcwd(), "movies.json")))
+            for m in movie_info_list:
+                if os.path.basename(m["filename"]) == filename:
+                    return flask.send_from_directory(os.path.dirname(m["filename"]), filename)
+            return flask.send_from_directory(os.path.join(os.getcwd(), "media"), filename)
         
         app.run(host=host, port=port, debug=self.debug)
