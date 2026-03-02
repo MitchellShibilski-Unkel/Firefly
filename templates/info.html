@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Firefly</title>
+        <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    </head>
+
+    <body>
+        <div class="shows glass-panel">
+            <p><strong>Title:</strong> {{ title }}</p>
+            <p><strong>Description:</strong> {{ description }}</p>
+            <p><strong>Genre:</strong> {{ genre }}</p>
+            <p><strong>Release Year:</strong> {{ release_year }}</p>
+
+            
+        </div>
+
+        <button type="button" onclick="window.location.href='/index'">Back to Home</button>
+
+    </body>
+
+</html>

@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Firefly</title>
+        <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    </head>
+    <body>
+        <div class="header glass-panel">
+            <h1>Firefly</h1>
+        </div>
+
+        <input class="search-bar" type="text" name="search" value="" placeholder="Search..." onkeydown="handleSearch(event, this.value)">
+
+        <h2>Search Results</h2>
+        <div class="shows glass-panel">
+            <div class="card-grid">
+                {% for result in search_results %}
+                    <div class="card" onclick="window.location.href='/info/{{ result }}'">
+                        <p>{{ result }}</p>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <script>
+            function handleSearch(event, value) {
+                if (event.key === "Enter" && value.trim() !== "") {
+                    window.location.href = "/search?q=" + encodeURIComponent(value.trim());
+                }
+            }
+        </script>
+        
+    </body>
+</html>

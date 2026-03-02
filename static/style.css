@@ -1,6 +1,154 @@
-.firefly-title {
-    font-size: 24px;
+/* Add a vibrant gradient background so the glass effect is visible */
+body {
+    font-family: "Segoe UI", "San Serif", monospace;
+    background: linear-gradient(135deg, #2c1069, #e02f6b, #15c2a1);
+    background-size: 200% 200%;
+    animation: gradientBG 15s ease infinite;
+    background-attachment: fixed;
+    color: #FFFFFF;
+    margin: 0;
+    padding: 30px;
+    min-height: 100vh;
+}
+
+/* Keyframe for subtle background movement */
+@keyframes gradientBG {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+/* Liquid Glass Effect Class */
+.glass-panel {
+    background: rgba(255, 255, 255, 0.05); /* Very transparent white */
+    backdrop-filter: blur(16px);           /* The core glass blur effect */
+    -webkit-backdrop-filter: blur(16px);   /* Safari support */
+    border: 1px solid rgba(255, 255, 255, 0.15); /* Subtle shiny glass edge */
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3); /* Depth and shadow */
+    border-radius: 25px;
+}
+
+.glass-panel:hover {
+    background: rgba(255, 255, 255, 0.1); /* Slightly more opaque on hover */
+    box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.4); /* Deeper shadow on hover */
+    border: 1px solid rgba(255, 255, 255, 0.25); /* More pronounced edge on hover */
+}
+
+.header {
+    padding: 20px;
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+h1 {
+    color: #FFFFFF; /* Changed to white to contrast the new background */
+    font-size: 50px;
+    margin: 0;
+    text-shadow: 0 4px 10px rgba(0,0,0,0.3); /* Adds depth to the text */
+}
+
+h2 {
+    margin-left: 15px;
+    font-weight: 400;
+    letter-spacing: 1px;
+    text-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.shows {
+    padding: 25px;
+    margin-bottom: 30px;
+}
+
+/* Style the lists to look like modern horizontal cards */
+ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+/* Inner elements get a subtle glass effect too */
+li {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 15px 30px;
+    border-radius: 15px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
     font-weight: bold;
-    color: #333;
-    margin-bottom: 20px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+/* Hover effect to make the glass "float" */
+li:hover {
+    transform: translateY(-5px);
+    background: rgba(255, 255, 255, 0.2);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+button {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 10px 20px;
+    border-radius: 10px;
+    color: #FFFFFF;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+button:hover {
+    background: rgba(255, 255, 255, 0.2);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.search-bar {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 10px 20px;
+    border-radius: 10px;
+    color: #FFFFFF;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: block;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.search-bar:hover {
+    background: rgba(255, 255, 255, 0.2);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: #FFFFFF;
+}
+
+.card-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    padding: 16px;
+}
+
+.card {
+    width: 160px;
+    height: 220px;
+    display: flex;
+    align-items: flex-end;
+    padding: 12px;
+    cursor: pointer;
+    border-radius: 12px;
+    transition: transform 0.2s ease;
+}
+
+.card:hover {
+    transform: scale(1.05);
+}
+
+.card p {
+    margin: 0;
+    font-weight: bold;
 }

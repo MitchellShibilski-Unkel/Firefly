@@ -1,12 +1,61 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
     <head>
         <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Firefly</title>
         <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     </head>
     <body>
-        <h1>Firefly</h1>
-        <p>Welcome to the Firefly app!</p>
+        <div class="header glass-panel">
+            <h1>Firefly</h1>
+        </div>
+
+        <div class="search-row">
+            <input class="search-bar" type="text" name="search" value="" placeholder="Search..." onkeydown="handleSearch(event, this.value)">
+            <button class="add-btn" onclick="window.location.href='/addMedia'">+</button>
+        </div>
+
+        <h2>Continue Watching</h2>
+        <div class="shows glass-panel">
+            <div class="card-grid">
+                {% for item in continue_watching %}
+                    <div class="card" onclick="window.location.href='/info/{{ item }}'">
+                        <p>{{ item }}</p>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <h2>Movies</h2>
+        <div class="shows glass-panel">
+            <div class="card-grid">
+                {% for mov in movies %}
+                    <div class="card" onclick="window.location.href='/info/{{ mov }}'">
+                        <p>{{ mov }}</p>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <h2>Shows</h2>
+        <div class="shows glass-panel">
+            <div class="card-grid">
+                {% for show in shows %}
+                    <div class="card" onclick="window.location.href='/info/{{ show }}'">
+                        <p>{{ show }}</p>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <script>
+            function handleSearch(event, value) {
+                if (event.key === "Enter" && value.trim() !== "") {
+                    window.location.href = "/search?q=" + encodeURIComponent(value.trim());
+                }
+            }
+        </script>
+        
     </body>
 </html>
