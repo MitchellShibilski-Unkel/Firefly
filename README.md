@@ -1,4 +1,5 @@
-# 🔥 Firefly
+# 🔥 Firefly (Alpha Version)
+**Alpha v1.0**
 A self-hosted media server for movies and TV shows, built with Python and Flask.
 
 ---
