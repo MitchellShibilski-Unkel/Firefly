@@ -2,7 +2,7 @@ import os
 import json
 import flask
 import shutil
-import tmdbv3api
+from tmdbv3api import TMDb, Movie
 
 
 class Firefly:
@@ -13,12 +13,12 @@ class Firefly:
         self.directory = "templates"
         self.apiKey = tmdbv3api_key
         if self.apiKey:
-            self.tmdb = tmdbv3api.TMDb()
+            self.tmdb = TMDb()
             self.tmdb.api_key = self.apiKey
-            self.search = tmdbv3api.Search()
+            self.movie = Movie()
         else:
             self.tmdb = None
-            self.search = None
+            self.movie = None
         
     def homeFile(self, filename: str = "index.html", directory: str = "templates"):
         self.index = filename
@@ -46,19 +46,17 @@ class Firefly:
         return f"{hours:02}:{minutes:02}:{secs:02}"
     
     def getMovieInformation(self, title: str):
-        if not self.search:
-            return {"length": "Unknown", "release": "Unknown", "poster": "", "overview": ""}
+        if not self.movie:
+            return {"length": "Unknown", "release": "Unknown", "poster": "", "overview": "", "genre": "Unknown"}
         try:
-            results = self.search.movie(query=title)
-            if not results:
-                return {"length": "Unknown", "release": "Unknown", "poster": "", "overview": ""}
-            movie = results[0]
-            movie_obj = tmdbv3api.Movie().details(movie.id)
-            poster_path = movie.poster_path if hasattr(movie, 'poster_path') else ""
-            poster_url = f"https://image.tmdb.org/t/p/w500{poster_path}" if poster_path else ""
-            return {"length": self.secondsToTime(movie_obj.runtime * 60) if hasattr(movie_obj, 'runtime') else "Unknown", "release": movie.release_date if hasattr(movie, 'release_date') else "Unknown", "poster": poster_url, "overview": movie.overview if hasattr(movie, 'overview') else ""}
+            results = self.movie.search(title)
+            result = results[0]
+            details = self.movie.details(result.id)
+            posterUrl = f"https://image.tmdb.org/t/p/w500{details.poster_path}" if details.poster_path else ""
+            genres = ", ".join([g.name for g in details.genres]) if details.genres else "Unknown"
+            return {"length": self.secondsToTime(details.runtime * 60) if details.runtime else "Unknown", "release": details.release_date, "poster": posterUrl, "overview": details.overview, "genre": genres}
         except Exception as e:
-            return {"length": "Unknown", "release": "Unknown", "poster": "", "overview": ""}
+            return {"length": "Unknown", "release": "Unknown", "poster": "", "overview": "", "genre": "Unknown"}
     
     def getMovies(self, dist: str = "movies.json"):
         with open(os.path.join(os.getcwd(), dist), "r") as f:         
@@ -92,8 +90,8 @@ class Firefly:
         shutil.move(filename, os.path.join(os.getcwd(), "media/movies", filename))
         with open(os.path.join(os.getcwd(), "movies.json"), "r") as f:
             movies = json.load(f)
-        movie_info = self.getMovieInformation(title) if self.search else {"length": "Unknown", "release": date or "Unknown", "poster": "", "overview": ""}
-        movies.append({"title": title, "filename": filename, "release": movie_info.get("release", date), "poster": movie_info.get("poster", ""), "overview": movie_info.get("overview", "")})
+        info = self.getMovieInformation(title) if self.movie else {"length": "Unknown", "release": date or "Unknown", "poster": "", "overview": "", "genre": "Unknown"}
+        movies.append({"title": title, "filename": filename, "release": info.get("release", date), "poster": info.get("poster", ""), "overview": info.get("overview", ""), "genre": info.get("genre", "Unknown"), "length": info.get("length", "Unknown")})
         with open(os.path.join(os.getcwd(), "movies.json"), "w") as f:
             json.dump(movies, f)
         return "Added"
