@@ -9,15 +9,30 @@
 
     <body>
         <div class="shows glass-panel" style="margin-right: 70%;">
-            <p><strong>Title:</strong> {{ title }}</p>
+            <h3 style="margin-left: 0px;"><strong>{{ title }}</strong></h3>
+            <hr>
             <p><strong>Description:</strong> {{ description }}</p>
             <p><strong>Genre:</strong> {{ genre }}</p>
-            <p><strong>Release Year:</strong> {{ release_year }}</p>
+            <p><strong>Release Date:</strong> {{ release }}</p>
             <p><strong>Time:</strong> {{ time }}</p>
-            <button type="button" onclick="window.location.href='/player/{{ movie }}'">Play</button>
+            <button type="button" id="playBtn" onclick="window.location.href='/player/{{ movie }}'">Play</button>
         </div>
 
         <button type="button" onclick="window.location.href='/index'">Back to Home</button>
+
+        <script>
+            for (let i = 0; i < localStorage.length; i++) {
+                const k = localStorage.key(i);
+                if (!k.startsWith("progress_")) continue;
+                try {
+                    const data = JSON.parse(localStorage.getItem(k));
+                    if ((data.movie === "{{ movie }}" || data.title === "{{ movie }}") && data.time > 0) {
+                        document.getElementById("playBtn").textContent = "Resume";
+                        break;
+                    }
+                } catch (e) {}
+            }
+        </script>
 
     </body>
 

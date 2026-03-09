@@ -9,6 +9,8 @@ body {
     margin: 0;
     padding: 30px;
     min-height: 100vh;
+    overflow-y: auto;
+    overflow-x: hidden;
 }
 
 /* Keyframe for subtle background movement */
@@ -47,7 +49,7 @@ h1 {
     text-shadow: 0 4px 10px rgba(0,0,0,0.3); /* Adds depth to the text */
 }
 
-h2 {
+h2, h3 {
     margin-left: 15px;
     font-weight: 400;
     letter-spacing: 1px;
@@ -88,6 +90,57 @@ li:hover {
     border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
+.search-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 30px;
+    align-items: center;
+}
+
+.search-bar {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 10px 20px;
+    border-radius: 10px;
+    color: #FFFFFF;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    height: 30px;
+}
+
+.search-bar:hover {
+    background: rgba(255, 255, 255, 0.2);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: #FFFFFF;
+}
+
+.search-bar::placeholder {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.add-btn {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 10px 20px;
+    border-radius: 10px;
+    color: #FFFFFF;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 18px;
+    white-space: nowrap;
+    height: 50px;
+}
+
+.add-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
 button {
     background: rgba(255, 255, 255, 0.1);
     border: 1px solid rgba(255, 255, 255, 0.1);
@@ -103,27 +156,6 @@ button:hover {
     background: rgba(255, 255, 255, 0.2);
     box-shadow: 0 5px 15px rgba(0,0,0,0.2);
     border: 1px solid rgba(255, 255, 255, 0.3);
-}
-
-.search-bar {
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    padding: 10px 20px;
-    border-radius: 10px;
-    color: #FFFFFF;
-    font-weight: bold;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    display: block;
-    margin: 0 auto;
-    text-align: center;
-}
-
-.search-bar:hover {
-    background: rgba(255, 255, 255, 0.2);
-    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    color: #FFFFFF;
 }
 
 .card-grid {
@@ -172,6 +204,10 @@ input:hover {
     box-shadow: 0 5px 15px rgba(0,0,0,0.2);
     border: 1px solid rgba(255, 255, 255, 0.3);
     color: #FFFFFF;
+}
+
+input::placeholder {
+    color: rgba(255, 255, 255, 0.7);
 }
 
 select {

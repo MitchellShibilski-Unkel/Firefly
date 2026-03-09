@@ -16,10 +16,17 @@
                 <label for="title">Title:</label> <br><br>
                 <input type="text" id="title" name="title" placeholder="Enter title"> <br><br>
                 <label for="type">Type:</label> <br> <br>
-                <select id="type" name="type">
+                <select id="type" name="type" onchange="toggleTV(this)">
                     <option value="movie">Movie</option>
                     <option value="tv">TV Show</option>
                 </select> <br><br>
+
+                <div id="tvOptions" style="display:none;">
+                    <label for="season">Season:</label> <br><br>
+                    <input type="number" id="season" name="season" placeholder="Season number" min="1"> <br><br>
+                    <label for="episode">Episode:</label> <br><br>
+                    <input type="number" id="episode" name="episode" placeholder="Episode number" min="1"> <br><br>
+                </div>
                 <label for="file">Select media file:</label> <br> <br>
                 <input type="file" id="file" name="file" required> <br><br>
                 <button type="submit">Upload</button>
@@ -27,4 +34,11 @@
         </div>
         
     </body>
+
+<script>
+    function toggleTV(select) {
+        document.getElementById("tvOptions").style.display = select.value === "tv" ? "block" : "none";
+    }
+</script>
+
 </html>
