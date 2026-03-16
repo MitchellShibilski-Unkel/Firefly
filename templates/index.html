@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Firefly</title>
+        <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    </head>
+    <body>
+        <div class="header glass-panel">
+            <h1>Firefly</h1>
+        </div>
+
+        <div class="search-row">
+            <input class="search-bar" type="text" name="search" value="" placeholder="Search..." onkeydown="handleSearch(event, this.value)">
+            <button class="add-btn" onclick="window.location.href='/addMedia'">+</button>
+        </div>
+
+        <h2>Continue Watching</h2>
+        <div class="shows glass-panel">
+            <div class="card-grid" id="continue-watching-grid"></div>
+        </div>
+
+        <h2>Movies</h2>
+        <div class="shows glass-panel">
+            <div class="card-grid">
+                {% for mov in movies %}
+                    <div class="card2" style="{% if mov.poster %}background-image: url('{{ mov.poster }}'); background-size: cover; background-position: center;{% endif %};" onclick="window.location.href='/info/{{ mov.title }}'">
+                        <p>{{ mov.title }}</p>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <h2>Shows</h2>
+        <div class="shows glass-panel">
+            <div class="card-grid">
+                {% for show in shows %}
+                    <div class="card2" style="{% if show.poster %}background-image: url('{{ show.poster }}'); background-size: cover; background-position: center;{% endif %};" onclick="window.location.href='/info/{{ show.title }}'">
+                        <p>{{ show.title }}</p>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <script>
+            function handleSearch(event, value) {
+                if (event.key === "Enter" && value.trim() !== "") {
+                    window.location.href = "/search?q=" + encodeURIComponent(value.trim());
+                }
+            }
+
+            const mediaPosters = {
+                {% for mov in movies %}"{{ mov.title }}": "{{ mov.poster }}",{% endfor %}
+                {% for show in shows %}"{{ show.title }}": "{{ show.poster }}",{% endfor %}
+            };
+            const validMedia = new Set(Object.keys(mediaPosters));
+
+            const grid = document.getElementById("continue-watching-grid");
+            for (let i = 0; i < localStorage.length; i++) {
+                const k = localStorage.key(i);
+                if (!k.startsWith("progress_")) continue;
+                const data = JSON.parse(localStorage.getItem(k));
+                if (!data || !data.time || data.time <= 0) continue;
+                const movieId = data.movie || data.title;
+                if (!movieId || !validMedia.has(movieId)) { localStorage.removeItem(k); i--; continue; }
+                const card = document.createElement("div");
+                card.className = "card";
+                card.onclick = () => window.location.href = "/info/" + movieId;
+                const poster = mediaPosters[movieId] || "";
+                if (poster) { card.style.backgroundImage = `url('${poster}')`; card.style.backgroundSize = "cover"; card.style.backgroundPosition = "center"; }
+                card.innerHTML = "<p>" + (data.title || data.filename) + "</p>";
+                grid.appendChild(card);
+            }
+        </script>
+        
+    </body>
+</html>
