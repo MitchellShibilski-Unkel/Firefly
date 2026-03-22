@@ -2,7 +2,7 @@ import os
 import json
 import flask
 import shutil
-from tmdbv3api import TMDb, Movie
+from tmdbv3api import TMDb, Movie, TV
 
 
 class Firefly:
@@ -18,9 +18,11 @@ class Firefly:
             self.tmdb = TMDb()
             self.tmdb.api_key = self.apiKey
             self.movie = Movie()
+            self.tvApi = TV()
         else:
             self.tmdb = None
             self.movie = None
+            self.tvApi = None
         
     def homeFile(self, filename: str = "index.html", directory: str = "templates"):
         self.index = filename
@@ -65,6 +67,29 @@ class Firefly:
         except Exception as e:
             print(e)
             return {"length": "Unknown", "release": "Unknown", "poster": "", "overview": "", "genre": "Unknown"}
+        
+    def getTVInformation(self, title: str, season: int, episode: int):
+        if not self.tvApi:
+            return {"length": "Unknown", "release": "Unknown", "poster": "", "overview": "", "genre": "Unknown", "season": season, "episode": episode}
+        try:
+            results = self.tvApi.search(title)
+            result = results[0]
+            details = self.tvApi.details(result.id)
+            posterUrl = f"https://image.tmdb.org/t/p/w500{details.poster_path}" if details.poster_path else ""
+            genres = ", ".join([g.name for g in details.genres]) if details.genres else "Unknown"
+            try:
+                epDetails = self.tvApi.episode(result.id, season, episode)
+                runtime = epDetails.runtime if epDetails.runtime else None
+                epOverview = epDetails.overview if epDetails.overview else details.overview
+                airDate = epDetails.air_date if epDetails.air_date else details.first_air_date
+            except Exception:
+                runtime = None
+                epOverview = details.overview
+                airDate = details.first_air_date
+            return {"length": self.secondsToTime(runtime * 60) if runtime else "Unknown", "release": airDate, "poster": posterUrl, "overview": epOverview, "genre": genres, "season": season, "episode": episode}
+        except Exception as e:
+            print(e)
+            return {"length": "Unknown", "release": "Unknown", "poster": "", "overview": "", "genre": "Unknown", "season": season, "episode": episode}
     
     def getMovies(self, dist: str = "movies.json"):
         with open(os.path.join(os.getcwd(), dist), "r") as f:
@@ -86,11 +111,24 @@ class Firefly:
     
     def loadTVShow(self, title: str, dist: str = "tv.json"):
         with open(os.path.join(os.getcwd(), dist), "r") as f:
-            tv_shows = json.load(f)
-        for show in tv_shows:
+            tvShows = json.load(f)
+        for show in tvShows:
             if show["title"] == title:
                 return show
         return None
+
+    def loadTVShowEpisodes(self, title: str, dist: str = "tv.json"):
+        with open(os.path.join(os.getcwd(), dist), "r") as f:
+            tvShows = json.load(f)
+        seasons = {}
+        for show in tvShows:
+            if show["title"] != title:
+                continue
+            s = show["season"]
+            if s not in seasons:
+                seasons[s] = []
+            seasons[s].append(show["episode"])
+        return {s: sorted(eps) for s, eps in sorted(seasons.items())}
     
     def addMovie(self, filename: str, title: str = "Unknown", date: str = "Unknown"):
         shutil.move(filename, os.path.join(os.getcwd(), "media/movies", filename))
@@ -106,7 +144,8 @@ class Firefly:
         shutil.move(filename, os.path.join(os.getcwd(), "media/tv", filename))
         with open(os.path.join(os.getcwd(), "tv.json"), "r") as f:
             shows = json.load(f)
-        shows.append({"title": title, "filename": filename, "season": season, "episode": episode, "release": date})
+        info = self.getTVInformation(title, season, episode) if self.tvApi else {"length": "Unknown", "release": date or "Unknown", "poster": "", "overview": "", "genre": "Unknown"}
+        shows.append({"title": title, "filename": filename, "season": season, "episode": episode, "release": date, "poster": info.get("poster", ""), "overview": info.get("overview", ""), "genre": info.get("genre", "Unknown"), "length": info.get("length", "Unknown")})
         with open(os.path.join(os.getcwd(), "tv.json"), "w") as f:
             json.dump(shows, f)
         return "Added"
@@ -151,10 +190,10 @@ class Firefly:
             searchResults = []
             for movie in movies:
                 if searchTerm.lower() in movie["title"].lower():
-                    searchResults.append(movie["title"])
+                    searchResults.append({"title": movie["title"], "poster": movie.get("poster", "")})
             for show in shows:
                 if searchTerm.lower() in show["title"].lower():
-                    searchResults.append(show["title"])
+                    searchResults.append({"title": show["title"], "poster": show.get("poster", "")})
             return flask.render_template("search.html", search_results=searchResults)
         
         @app.route("/addMedia", methods=["GET", "POST"])
@@ -187,30 +226,59 @@ class Firefly:
                 self.addTVShow(savePath, title, releaseDate, season, episode)
             return flask.redirect("/")
         
-        @app.route("/info/<movie>", methods=["GET", "POST"])
-        def info(movie):
+        @app.route("/info/<title>", methods=["GET", "POST"])
+        def info(title):
             if redir := checkAuth(): return redir
-            movieInfo = self.loadMovie(movie)
+            movieInfo = self.loadMovie(title)
             if not movieInfo:
-                return "Movie not found", 404
-            metadata = self.getMovieInformation(movieInfo["title"])
-            return flask.render_template(self.info, movie=movie, title=movieInfo["title"], description=movieInfo.get("overview") or metadata.get("overview", "Unknown"), genre=movieInfo.get("genre", "Unknown"), time=metadata["length"], release=metadata["release"])
+                tvInfo = self.loadTVShow(title)
+                if not tvInfo:
+                    return "Not found", 404
+                seasons = self.loadTVShowEpisodes(title)
+                firstSeason = min(seasons.keys())
+                firstEpisode = seasons[firstSeason][0]
+                return flask.redirect(f"/info/{title}/{firstSeason}/{firstEpisode}")
+            else:
+                metadata = self.getMovieInformation(movieInfo["title"])
+                return flask.render_template(self.info, title=movieInfo["title"], description=movieInfo.get("overview") or metadata.get("overview", "Unknown"), genre=movieInfo.get("genre", "Unknown"), time=metadata["length"], release=metadata["release"], poster=movieInfo.get("poster", ""))
         
-        @app.route("/player/<movie>", methods=["GET", "POST"])
-        def player(movie):
+        @app.route("/info/<tvShow>/<int:season>/<int:episode>", methods=["GET", "POST"])
+        def infoTV(tvShow, season, episode):
             if redir := checkAuth(): return redir
-            movie_info = self.loadMovie(movie)
-            if not movie_info:
-                return "Movie not found", 404
-            return flask.render_template("player.html", movie=movie, title=movie_info["title"], filename=os.path.basename(movie_info["filename"]))
+            tvInfo = self.loadTVShow(tvShow)
+            if not tvInfo:
+                return "TV show not found", 404
+            metadata = self.getTVInformation(tvInfo["title"], season, episode)
+            seasons = self.loadTVShowEpisodes(tvInfo["title"])
+            return flask.render_template("infoTV.html", title=tvInfo["title"], description=tvInfo.get("overview") or metadata.get("overview", "Unknown"), genre=metadata.get("genre", "Unknown"), time=metadata["length"], release=metadata["release"], season=season, episode=episode, seasons=seasons, poster=tvInfo.get("poster", ""))
+        
+        @app.route("/player/<title>", methods=["GET", "POST"])
+        def player(title):
+            if redir := checkAuth(): return redir
+            movieInfo = self.loadMovie(title)
+            if movieInfo:
+                return flask.render_template("player.html", title=movieInfo["title"], filename=os.path.basename(movieInfo["filename"]))
+            tvInfo = self.loadTVShow(title)
+            if tvInfo:
+                return flask.redirect(f"/player/{title}/{tvInfo['season']}/{tvInfo['episode']}")
+            return "Not found", 404
+
+        @app.route("/player/<tvShow>/<int:season>/<int:episode>", methods=["GET", "POST"])
+        def playerTV(tvShow, season, episode):
+            if redir := checkAuth(): return redir
+            tvInfo = self.loadTVShow(tvShow)
+            if not tvInfo:
+                return "TV show not found", 404
+            return flask.render_template("player.html", title=tvInfo["title"], filename=os.path.basename(tvInfo["filename"]), season=season, episode=episode)
 
         @app.route("/media/<path:filename>")
         def media(filename):
             if redir := checkAuth(): return redir
-            movie_info_list = json.load(open(os.path.join(os.getcwd(), "movies.json")))
-            for m in movie_info_list:
-                if os.path.basename(m["filename"]) == filename:
-                    return flask.send_from_directory(os.path.dirname(m["filename"]), filename)
+            for jsonFile in ["movies.json", "tv.json"]:
+                mediaList = json.load(open(os.path.join(os.getcwd(), jsonFile)))
+                for m in mediaList:
+                    if os.path.basename(m["filename"]) == filename:
+                        return flask.send_from_directory(os.path.dirname(m["filename"]), filename)
             return flask.send_from_directory(os.path.join(os.getcwd(), "media"), filename)
         
         if useHTTPS == True:

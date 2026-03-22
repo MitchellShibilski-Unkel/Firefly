@@ -17,8 +17,8 @@
         <div class="shows glass-panel">
             <div class="card-grid">
                 {% for result in search_results %}
-                    <div class="card" onclick="window.location.href='/info/{{ result }}'">
-                        <p>{{ result }}</p>
+                    <div class="card" style="{% if result.poster %}background-image: url('{{ result.poster }}'); background-size: cover; background-position: center;{% endif %};" onclick="window.location.href='/info/{{ result.title }}'">
+                        <p>{{ result.title }}</p>
                     </div>
                 {% endfor %}
             </div>

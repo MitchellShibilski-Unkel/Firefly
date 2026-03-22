@@ -49,7 +49,7 @@ h1 {
     text-shadow: 0 4px 10px rgba(0,0,0,0.3); /* Adds depth to the text */
 }
 
-h2, h3 {
+h2, h3, h4 {
     margin-left: 15px;
     font-weight: 400;
     letter-spacing: 1px;

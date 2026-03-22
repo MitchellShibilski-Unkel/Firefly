@@ -10,4 +10,4 @@ ff.homeFile(filename="index.html", directory="templates")
 ff.infoPage(filename="info.html", directory="templates")
 ff.loginFile(filename="login.html", directory="templates")
 
-ff.run(host="0.0.0.0", port="5000")
+ff.run(host="127.0.0.1", port="5000")

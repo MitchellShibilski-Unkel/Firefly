@@ -18,23 +18,43 @@
                 <p><strong>Description:</strong> {{ description }}</p>
                 <p><strong>Genre:</strong> {{ genre }}</p>
                 <p><strong>Release Date:</strong> {{ release }}</p>
-                <p><strong>Time:</strong> {{ time }}</p>
-                <button type="button" id="playBtn" onclick="window.location.href='/player/{{ movie }}'">Play</button>
+                <p><strong>Season:</strong> {{ season }}</p>
+                <p><strong>Episode:</strong> {{ episode }}</p>
+                <button type="button" id="playBtn" onclick="window.location.href='/player/{{ title }}/{{ season }}/{{ episode }}'">Play</button>
             </div>
         </div>
 
+        <hr>
+
         <button type="button" onclick="window.location.href='/index'">Back to Home</button>
+
+        <hr>
+
+        <div class="shows glass-panel">
+            {% for s, episodes in seasons.items() %}
+            <div class="season-block">
+                <h4><strong>Season {{ s }}</strong></h4>
+                <div class="card-grid">
+                {% for ep in episodes %}
+                <div class="card2 {% if s == season and ep == episode %}active{% endif %}" onclick="window.location.href='/info/{{ title }}/{{ s }}/{{ ep }}'">
+                    Episode {{ ep }}
+                </div>
+                {% endfor %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
 
         <script>
             for (let i = 0; i < localStorage.length; i++) {
                 const k = localStorage.key(i);
                 if (!k.startsWith("progress_")) continue;
                 try {
-                    const data = JSON.parse(localStorage.getItem(k));
-                    if ((data.movie === "{{ movie }}" || data.title === "{{ movie }}") && data.time > 0) {
-                        document.getElementById("playBtn").textContent = "Resume";
-                        break;
-                    }
+                const data = JSON.parse(localStorage.getItem(k));
+                if ((data.movie === "{{ title }}" || data.title === "{{ title }}") && data.time > 0) {
+                    document.getElementById("playBtn").textContent = "Resume";
+                    break;
+                }
                 } catch (e) {}
             }
         </script>
